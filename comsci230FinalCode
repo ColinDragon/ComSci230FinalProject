@@ -1,0 +1,51 @@
+import pandas as pd
+import csv
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import rcParams #add to size and scale
+from csv import writer
+
+# Data Frame for std of highs & lows of every day for the last 20 yrs
+df = pd.read_csv('/Users/gabegwiazda/Desktop/Coding/University/SPyder/Final Project /SPY.csv')
+dfhighLow = df[['open','high','low']]
+dfhighLow['pchangeH'] = (dfhighLow.high - dfhighLow.open)/ abs(dfhighLow.open) * 100
+dfhighLow['pchangeL'] = (dfhighLow.low - dfhighLow.open)/ abs(dfhighLow.open) * 100
+std=dfhighLow[['pchangeH','pchangeL']].std()
+
+print(std)
+
+# Real time data
+from yahoo_fin.stock_info import *
+import time
+from datetime import datetime
+from datetime import datetime, timedelta
+currentP = get_live_price("SPY")
+currentP = round(currentP,2)
+
+# Plotting
+import time
+from datetime import datetime
+from datetime import datetime, timedelta
+today = str(datetime.now().strftime("%Y-%m-%d"))
+num=str(get_data('SPY', start_date=(today)))
+openStr = str(num[94:100])
+openInt = float(openStr)
+
+#
+highPrice = openInt* 0.0069 + openInt
+lowPrice =  openInt - (openInt * 0.0079)
+
+# Define data values and Graph
+x = np.array([highPrice, highPrice, highPrice, highPrice])  # X-axis points
+y = np.array([lowPrice, lowPrice, lowPrice, lowPrice])
+current = np.array([currentP, currentP, currentP, currentP])
+open = np.array([openInt, openInt, openInt, openInt])
+plt.plot(x, color='red', label='HighPrice')
+plt.plot(y, color='red', label='LowPrice')
+plt.plot(current, color='green', label='CurrentPrice')
+plt.plot(open, color='black', label='OpenPrice')
+plt.xlabel(today)
+plt.ylabel('Price')
+plt.title('Line Graph for HighPrice, LowPrice, and OpenPrice')
+plt.legend(loc='upper right')
+plt.show()  # display
