@@ -1,0 +1,381 @@
+# Final COde 
+import os
+import statistics
+import csv
+import tkinter as tk
+from tkinter import filedialog
+list1 = []
+fileList = []
+class Node:
+    """Create a node to store data"""
+
+    def __init__(self, student_id, data=None):
+        self.student_id = student_id
+        self.data = data
+        self.next = None
+
+class LinkedList:
+    """Linked list to handle data"""
+
+    def __init__(self):
+        self.head = None
+
+    def insert(self, student_id, data):
+        """Insert or update node in the linked list"""
+        new_node = Node(student_id, data)
+        if self.head is None:
+            self.head = new_node
+        else:
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = new_node
+
+    def display(self):
+        """Display the linked list data"""
+        current = self.head
+        while current:
+            print(f"Student ID: {current.student_id}, Data: {current.data}")
+            current = current.next
+
+def calculate_gpa(grade):
+    """Convert grade to GPA points, ignoring non-GPA grades"""
+    grade_to_points = {
+        'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7,
+        'C+': 2.3, 'C': 2.0, 'C-': 1.7, 'D+': 1.3, 'D': 1.0, 'D-': 0.7, 'F': 0.0
+    }
+    return grade_to_points.get(grade.strip().strip('"'), None)
+
+import csv
+
+def process_file(file_path, student_grades):
+    print(f"Processing file: {file_path}")
+    total_gpa = 0
+    count_valid = 0
+    with open(file_path, newline='') as file:
+        reader = csv.reader(file)
+        for line_number, parts in enumerate(reader, start=1):
+            print(f"Line {line_number}: parts = {parts}")
+            if len(parts) < 3:
+                print(f"Skipping line {line_number} due to insufficient data: {parts}")
+                continue
+            student_id, _, grade = (part.strip().strip('"') for part in parts)
+            if not grade:  # Check if grade is empty
+                print(f"Skipping line {line_number} as no grade is present: {parts}")
+                continue
+            try:
+                first_char = grade[0]
+            except IndexError:
+                print(f"Skipping line {line_number} as grade is improperly formatted: {parts}")
+                continue
+            if first_char in ['A', 'D', 'F']:  # Check if the first character of grade is one of A, D, F
+                student_grades.setdefault(student_id, {'A': 0, 'D': 0, 'F': 0})
+                student_grades[student_id][first_char] += 1
+            gpa = calculate_gpa(grade)
+            if gpa is not None:
+                total_gpa += gpa
+                count_valid += 1
+
+    avg_gpa = total_gpa / count_valid if count_valid > 0 else 0
+    print(f"Average GPA for {os.path.basename(file_path)}: {avg_gpa}")
+    return avg_gpa
+
+def process_group(file_path, directory, student_grades):
+    print(f"Processing group file: {file_path}")
+    total_gpa = 0
+    count = 0
+    with open(file_path, 'r') as file:
+        for line in file:
+            section_file = line.strip()
+            section_path = os.path.join(directory, section_file)
+            if os.path.exists(section_path):
+                gpa = process_file(section_path, student_grades)
+                total_gpa += gpa
+                count += 1
+            else:
+                print(f"Referenced section file not found: {section_path}")
+    avg_gpa = total_gpa / count if count > 0 else 0
+    print(f"Combined Average GPA for group {os.path.basename(file_path)}: {avg_gpa}")
+    return avg_gpa
+
+
+def process_directory(directory):
+    student_grades = {}
+    gpa_results = []
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        if filename.endswith('.sec'):
+            avg_gpa = process_file(file_path, student_grades)
+            gpa_results.append((filename, avg_gpa))
+        elif filename.endswith('.grp'):
+            avg_gpa = process_group(file_path, directory, student_grades)
+            gpa_results.append((filename, avg_gpa))
+
+
+    for result in gpa_results:
+        print(f"File: {result[0]}, Average GPA: {result[1]}")
+        list1.append((result[1]))
+        fileList.append(result[0])
+
+
+
+    # Calculate and display students with >= 2 'A's, 'D's, or 'F's
+    qualifying_students = {grade: [] for grade in ['A', 'D', 'F']}
+    for student_id, grades in student_grades.items():
+        for grade in ['A', 'D', 'F']:
+            if grades[grade] >= 2:
+                qualifying_students[grade].append(student_id)
+
+    print("\nStudents with >= 2 'A's, 'D's, or 'F's:")
+    for grade, students in qualifying_students.items():
+        print(f"Grade {grade}: {len(students)} students")
+        for student_id in students:
+            print(f"  Student ID: {student_id}, Count: {student_grades[student_id][grade]}")
+
+
+place = ""
+
+def select_folder():
+    global place
+    folder_path = filedialog.askdirectory()
+    if folder_path:
+        print("Selected folder:", folder_path)
+        place = folder_path
+
+def close_window():
+    root.destroy()
+
+# Create the main window
+root = tk.Tk()
+root.title("Folder Selection")
+
+# Create a button to trigger folder selection
+select_button = tk.Button(root, text="Select Folder", command=select_folder)
+select_button.pack(pady=20)
+
+# Create a button to close the window
+run_button = tk.Button(root, text="Run", command=close_window)
+run_button.pack(pady=10)
+
+root.mainloop()
+
+def main():
+
+    directory = place
+    process_directory(directory)
+def main():
+
+    directory = place  # Adjust this path if necessary
+    process_directory(directory)
+
+
+
+if __name__ == "__main__":
+    main()
+    counter = 0
+    for x in list1:
+        counter = counter + x
+    print("*********************************************")
+    print("\033[4m\033[1m" + "Group average and Section Stats" + "\033[0m")
+    groupavg = counter / len(list1)
+    print("Avg Group GPA: ", groupavg)
+    std_dev = statistics.stdev(list1)
+    print("STD_dev: ", std_dev)
+    print('STD_dev Range', groupavg - std_dev, 'through', groupavg + std_dev)
+    fileCounter = 0
+    for x in list1:
+        z_score = (x - groupavg) / std_dev
+        if x < groupavg - std_dev or x > groupavg + std_dev:
+            print(fileList[fileCounter], 'Is significantly different with an avg Gpa of: ', x, 'Z-Score:', z_score)
+        fileCounter = fileCounter + 1
+
+import os
+import statistics
+import csv
+import tkinter as tk
+from tkinter import filedialog
+list1 = []
+fileList = []
+class Node:
+    """Create a node to store data"""
+
+    def __init__(self, student_id, data=None):
+        self.student_id = student_id
+        self.data = data
+        self.next = None
+
+class LinkedList:
+    """Linked list to handle data"""
+
+    def __init__(self):
+        self.head = None
+
+    def insert(self, student_id, data):
+        """Insert or update node in the linked list"""
+        new_node = Node(student_id, data)
+        if self.head is None:
+            self.head = new_node
+        else:
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = new_node
+
+    def display(self):
+        """Display the linked list data"""
+        current = self.head
+        while current:
+            print(f"Student ID: {current.student_id}, Data: {current.data}")
+            current = current.next
+
+def calculate_gpa(grade):
+    """Convert grade to GPA points, ignoring non-GPA grades"""
+    grade_to_points = {
+        'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7,
+        'C+': 2.3, 'C': 2.0, 'C-': 1.7, 'D+': 1.3, 'D': 1.0, 'D-': 0.7, 'F': 0.0
+    }
+    return grade_to_points.get(grade.strip().strip('"'), None)
+
+import csv
+
+def process_file(file_path, student_grades):
+    print(f"Processing file: {file_path}")
+    total_gpa = 0
+    count_valid = 0
+    with open(file_path, newline='') as file:
+        reader = csv.reader(file)
+        for line_number, parts in enumerate(reader, start=1):
+            print(f"Line {line_number}: parts = {parts}")
+            if len(parts) < 3:
+                print(f"Skipping line {line_number} due to insufficient data: {parts}")
+                continue
+            student_id, _, grade = (part.strip().strip('"') for part in parts)
+            if not grade:  # Check if grade is empty
+                print(f"Skipping line {line_number} as no grade is present: {parts}")
+                continue
+            try:
+                first_char = grade[0]
+            except IndexError:
+                print(f"Skipping line {line_number} as grade is improperly formatted: {parts}")
+                continue
+            if first_char in ['A', 'D', 'F']:  # Check if the first character of grade is one of A, D, F
+                student_grades.setdefault(student_id, {'A': 0, 'D': 0, 'F': 0})
+                student_grades[student_id][first_char] += 1
+            gpa = calculate_gpa(grade)
+            if gpa is not None:
+                total_gpa += gpa
+                count_valid += 1
+
+    avg_gpa = total_gpa / count_valid if count_valid > 0 else 0
+    print(f"Average GPA for {os.path.basename(file_path)}: {avg_gpa}")
+    return avg_gpa
+
+def process_group(file_path, directory, student_grades):
+    print(f"Processing group file: {file_path}")
+    total_gpa = 0
+    count = 0
+    with open(file_path, 'r') as file:
+        for line in file:
+            section_file = line.strip()
+            section_path = os.path.join(directory, section_file)
+            if os.path.exists(section_path):
+                gpa = process_file(section_path, student_grades)
+                total_gpa += gpa
+                count += 1
+            else:
+                print(f"Referenced section file not found: {section_path}")
+    avg_gpa = total_gpa / count if count > 0 else 0
+    print(f"Combined Average GPA for group {os.path.basename(file_path)}: {avg_gpa}")
+    return avg_gpa
+
+
+def process_directory(directory):
+    student_grades = {}
+    gpa_results = []
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        if filename.endswith('.sec'):
+            avg_gpa = process_file(file_path, student_grades)
+            gpa_results.append((filename, avg_gpa))
+        elif filename.endswith('.grp'):
+            avg_gpa = process_group(file_path, directory, student_grades)
+            gpa_results.append((filename, avg_gpa))
+
+
+    for result in gpa_results:
+        print(f"File: {result[0]}, Average GPA: {result[1]}")
+        list1.append((result[1]))
+        fileList.append(result[0])
+
+
+
+    # Calculate and display students with >= 2 'A's, 'D's, or 'F's
+    qualifying_students = {grade: [] for grade in ['A', 'D', 'F']}
+    for student_id, grades in student_grades.items():
+        for grade in ['A', 'D', 'F']:
+            if grades[grade] >= 2:
+                qualifying_students[grade].append(student_id)
+
+    print("\nStudents with >= 2 'A's, 'D's, or 'F's:")
+    for grade, students in qualifying_students.items():
+        print(f"Grade {grade}: {len(students)} students")
+        for student_id in students:
+            print(f"  Student ID: {student_id}, Count: {student_grades[student_id][grade]}")
+
+
+place = ""
+
+def select_folder():
+    global place
+    folder_path = filedialog.askdirectory()
+    if folder_path:
+        print("Selected folder:", folder_path)
+        place = folder_path
+
+def close_window():
+    root.destroy()
+
+# Create the main window
+root = tk.Tk()
+root.title("Folder Selection")
+
+# Create a button to trigger folder selection
+select_button = tk.Button(root, text="Select Folder", command=select_folder)
+select_button.pack(pady=20)
+
+# Create a button to close the window
+run_button = tk.Button(root, text="Run", command=close_window)
+run_button.pack(pady=10)
+
+root.mainloop()
+
+def main():
+
+    directory = place
+    process_directory(directory)
+def main():
+
+    directory = place  # Adjust this path if necessary
+    process_directory(directory)
+
+
+
+if __name__ == "__main__":
+    main()
+    counter = 0
+    for x in list1:
+        counter = counter + x
+    print("*********************************************")
+    print("\033[4m\033[1m" + "Group average and Section Stats" + "\033[0m")
+    groupavg = counter / len(list1)
+    print("Avg Group GPA: ", groupavg)
+    std_dev = statistics.stdev(list1)
+    print("STD_dev: ", std_dev)
+    print('STD_dev Range', groupavg - std_dev, 'through', groupavg + std_dev)
+    fileCounter = 0
+    for x in list1:
+        z_score = (x - groupavg) / std_dev
+        if x < groupavg - std_dev or x > groupavg + std_dev:
+            print(fileList[fileCounter], 'Is significantly different with an avg Gpa of: ', x, 'Z-Score:', z_score)
+        fileCounter = fileCounter + 1
+
