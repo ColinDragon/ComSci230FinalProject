@@ -1,1 +1,36 @@
-Readme.
+GPA Analyzer
+
+The GPA Analyzer is a Python program designed to analyze .sec and .grp files to calculate GPA statistics for student groups. The tool helps you calculate average GPAs, identify students with multiple grades of A, D, or F, and find outliers using statistical methods. It also features a simple graphical interface that allows you to select a folder containing your files for processing.
+
+Features:
+Parses individual .sec files and grouped .grp files.
+Calculates GPA using a standard 4.0 scale.
+Identifies students with ≥ 2 A’s, D’s, or F’s.
+Computes overall group GPA, standard deviation, and flags statistical outliers.
+GUI-based folder selection (using Tkinter).
+
+How It Works:
+User selects a folder via the GUI.
+The program processes all .sec and .grp files in the selected directory.
+For each file:
+GPA is calculated and stored.
+Students with ≥ 2 A/D/F grades are flagged.
+
+Outputs include:
+Average GPA per file.
+Overall group average GPA.
+Standard deviation and outlier detection based on z-score.
+
+File Types:
+.sec: Contains individual student grade entries.
+.grp: References multiple .sec files to compute a combined GPA.
+
+Running the Program:
+Run this script - python gpa_analyzer.py
+Then select a folder containing .sec and/or .grp files via the GUI, then press Run.
+
+Dependencies:
+Python 3.x
+
+License
+MIT License
